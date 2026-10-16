@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dulz Panel Admin</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{
+  --bg:#f5f6f8;--surface:#fff;--field:#fff;--ink:#161b22;--mute:#667085;--line:#e4e7ec;
+  --accent:#0f766e;--accent-h:#0b5f58;--accent-ink:#fff;--accent-soft:rgba(15,118,110,.1);
+  --danger:#c0392b;--ok:#15803d;--warn:#b45309;--shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#0e1217;--surface:#151b23;--field:#0f141b;--ink:#e8ecf1;--mute:#8b95a5;--line:#263040;
+  --accent:#2dd4bf;--accent-h:#5eead4;--accent-ink:#04201d;--accent-soft:rgba(45,212,191,.12);
+  --danger:#f87171;--ok:#4ade80;--warn:#fbbf24;--shadow:0 8px 24px rgba(0,0,0,.35);
+}}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.55 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- Form elements ---------- */
+label.lbl{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}
+.field{position:relative;display:flex;align-items:center}
+.field>i.lead{position:absolute;left:13px;color:var(--mute);font-size:13px;pointer-events:none}
+.input,textarea,select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;transition:border-color .15s,box-shadow .15s}
+.field .input{padding-left:38px}
+.field .input.has-trail{padding-right:42px}
+.input::placeholder,textarea::placeholder{color:var(--mute);opacity:.8}
+textarea{resize:vertical;min-height:84px}
+.input:focus,textarea:focus,select:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.trail{position:absolute;right:4px;background:none;border:0;color:var(--mute);width:34px;height:34px;border-radius:8px;cursor:pointer}
+.trail:hover{color:var(--ink);background:var(--accent-soft)}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:10px;padding:10px 16px;font-weight:600;font-size:14px;cursor:pointer;background:var(--accent);color:var(--accent-ink);transition:background .15s,opacity .15s}
+.btn:hover{background:var(--accent-h)}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn.block{width:100%;margin-top:18px}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.btn.sm{padding:6px 10px;font-size:12.5px;border-radius:8px}
+.btn.warn{background:var(--warn);color:#fff}
+.icon-btn{flex:none;width:42px;padding:0;height:42px}
+
+.row{display:flex;gap:8px;align-items:center}
+.row>.grow{flex:1;min-width:0}
+.hint{font-size:12.5px;color:var(--mute);margin-top:6px}
+.msg{font-size:13px;margin-top:12px;min-height:18px}
+.msg.err{color:var(--danger)}.msg.ok{color:var(--ok)}.msg.load{color:var(--mute)}
+.check{display:flex;align-items:center;gap:9px;font-size:13.5px;cursor:pointer;user-select:none}
+.check input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer}
+.meter{height:4px;border-radius:4px;background:var(--line);margin-top:8px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;transition:width .2s,background .2s}
+
+/* ---------- Login ---------- */
+#login{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.login-brand{background:var(--accent);color:var(--accent-ink);padding:48px;display:flex;flex-direction:column;justify-content:space-between}
+.login-brand .logo{background:var(--accent-ink);color:var(--accent)}
+.login-brand h2{font-size:34px;line-height:1.15;font-weight:800;letter-spacing:-.02em;max-width:14ch}
+.login-brand p{margin-top:14px;opacity:.85;max-width:38ch}
+.login-side{display:flex;align-items:center;justify-content:center;padding:32px 20px}
+.login-card{width:100%;max-width:380px}
+.login-card h1{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.login-card .sub{color:var(--mute);margin-top:4px}
+.login-opts{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:10px;flex-wrap:wrap}
+.link{background:none;border:0;color:var(--accent);font-weight:600;font-size:13px;cursor:pointer;padding:0}
+.link:hover{text-decoration:underline}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px;letter-spacing:-.01em}
+.logo{width:34px;height:34px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:800;font-size:16px}
+
+/* ---------- App ---------- */
+.topbar{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--line)}
+.topbar .in{max-width:820px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.who{display:flex;align-items:center;gap:10px;min-width:0}
+.who span{color:var(--mute);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wrap{max-width:820px;margin:0 auto;padding:20px 16px 56px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.stat span{font-size:12.5px;color:var(--mute)}
+.stat b{display:block;font-size:16px;font-weight:700;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+.tab{background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:10px 14px;font-weight:600;color:var(--mute);cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.pane{display:none}.pane.active{display:block}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow);margin-bottom:16px}
+.panel h2{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.panel .desc{color:var(--mute);font-size:13px;margin-top:2px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.cred{display:none;margin-top:14px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.7;word-break:break-all;white-space:pre-wrap}
+.cred.on{display:block}
+
+details{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+summary{cursor:pointer;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"\f054";font-family:"Font Awesome 6 Free";font-weight:900;font-size:10px;color:var(--mute);transition:transform .15s}
+details[open] summary::before{transform:rotate(90deg)}
+details>div{margin-top:12px}
+
+.toolbar{display:flex;gap:8px;margin:14px 0 4px}
+.users{max-height:420px;overflow-y:auto}
+.urow{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.urow:last-child{border:0}
+.avatar{flex:none;width:34px;height:34px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:13px}
+.uinfo{flex:1;min-width:0}
+.uinfo b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.uinfo small{color:var(--mute);font-size:12px}
+.uact{display:flex;gap:6px;flex:none}
+.empty{text-align:center;color:var(--mute);padding:28px 0}
+
+.maint{display:flex;justify-content:space-between;align-items:center;gap:14px}
+.switch{position:relative;display:inline-block;width:46px;height:26px;flex:none}
+.switch input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:1;margin:0}
+.slider{position:absolute;inset:0;background:var(--line);transition:.2s;border-radius:26px}
+.slider::before{content:"";position:absolute;height:20px;width:20px;left:3px;top:3px;background:#fff;transition:.2s;border-radius:50%;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.switch input:checked+.slider{background:var(--danger)}
+.switch input:checked+.slider::before{transform:translateX(20px)}
+.switch input:focus-visible+.slider{outline:2px solid var(--accent);outline-offset:2px}
+
+.hist{max-height:480px;overflow-y:auto}
+.hrow{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.hrow:last-child{border:0}
+.hrow time{flex:none;width:104px;color:var(--mute);font-size:12.5px}
+.hrow div{min-width:0;overflow-wrap:anywhere}.hrow small{color:var(--mute)}
+
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.2s;max-width:90vw;z-index:30}
+#toast.on{opacity:1;transform:translateX(-50%)}
+
+.badge{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:99px;margin-left:8px;vertical-align:middle;background:var(--accent-soft);color:var(--accent)}
+.badge.ban{background:rgba(192,57,43,.12);color:var(--danger)}
+.badge.exp{background:rgba(180,83,9,.14);color:var(--warn)}
+.badge.on{background:rgba(21,128,61,.14);color:var(--ok)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip{background:var(--field);border:1px solid var(--line);border-radius:99px;padding:4px 12px;font-size:12.5px;color:var(--mute)}
+.chip b{color:var(--ink);margin-right:4px}
+.frow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.frow:last-child{border:0}.frow code{flex:1;min-width:0;overflow-wrap:anywhere;font-family:"JetBrains Mono",monospace;font-size:13px}
+.switch.ok input:checked+.slider{background:var(--accent)}
+.code{background:var(--field);border:1px solid var(--line);border-radius:10px;padding:14px;font-size:12.5px;line-height:1.7;overflow-x:auto;white-space:pre;margin-top:12px}
+.panel.danger{border-color:var(--danger)}
+.steps{margin:12px 0 0 18px;display:grid;gap:6px;font-size:13.5px}
+@media(max-width:860px){
+  #login{grid-template-columns:1fr}
+  .login-brand{display:none}
+}
+@media(max-width:560px){
+  .stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:1/-1}
+  .grid2{grid-template-columns:1fr}
+  .panel{padding:18px}
+  .who span{display:none}
+  .urow{flex-wrap:wrap}.uact{width:100%;padding-left:46px}
+  .hrow time{width:84px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="login" hidden>
+  <aside class="login-brand">
+    <div class="brand"><div class="logo">D</div> Dulz Panel</div>
+    <div>
+      <h2>Kelola aplikasi dari satu tempat.</h2>
+      <p>Buat akun pengguna, atur mode maintenance, kirim pengumuman, dan rilis versi baru tanpa membuka Firebase Console.</p>
+    </div>
+    <small style="opacity:.7">Khusus admin</small>
+  </aside>
+  <main class="login-side">
+    <form class="login-card" id="loginForm" novalidate>
+      <div class="brand" style="margin-bottom:28px"><div class="logo">D</div> Dulz Panel</div>
+      <h1>Masuk</h1>
+      <p class="sub">Gunakan akun admin untuk membuka panel.</p>
+
+      <label class="lbl" for="lEmail">Email</label>
+      <div class="field"><i class="lead fa-regular fa-envelope"></i>
+        <input class="input" type="email" id="lEmail" autocomplete="username" placeholder="admin@email.com" required></div>
+
+      <label class="lbl" for="lPass">Password</label>
+      <div class="field"><i class="lead fa-solid fa-lock"></i>
+        <input class="input has-trail" type="password" id="lPass" autocomplete="current-password" placeholder="Masukkan password" required>
+        <button type="button" class="trail" id="lShow" aria-label="Tampilkan password"><i class="fa-solid fa-eye"></i></button></div>
+
+      <div class="login-opts">
+        <label class="check"><input type="checkbox" id="lRemember" checked> Ingat saya</label>
+        <button type="button" class="link" id="lForgot">Lupa password?</button>
+      </div>
+
+      <button class="btn block" id="lBtn" type="submit"><span>Masuk</span></button>
+      <p class="msg err" id="lMsg" role="alert"></p>
+    </form>
+  </main>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" hidden>
+  <header class="topbar"><div class="in">
+    <div class="brand"><div class="logo">D</div> Dulz Panel</div>
+    <div class="who"><span id="whoEmail"></span><button class="btn ghost sm" id="logoutBtn" hidden><i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar</button></div>
+  </div></header>
+
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><span>Status aplikasi</span><b id="sMaint">-</b></div>
+      <div class="stat"><span>Versi terbaru</span><b id="sVer">-</b></div>
+      <div class="stat"><span>Pengumuman</span><b id="sAnn">-</b></div>
+    </div>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="akun"><i class="fa-solid fa-user-plus"></i> Akun</button>
+      <button class="tab" data-tab="kontrol"><i class="fa-solid fa-sliders"></i> Kontrol</button>
+      <button class="tab" data-tab="riwayat"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat</button>
+      <button class="tab" data-tab="integrasi"><i class="fa-solid fa-plug"></i> Integrasi APK</button>
+    </nav>
+
+    <!-- ===== TAB AKUN ===== -->
+    <section id="tab-akun" class="pane active">
+      <div class="panel">
+        <h2>Buat akun aplikasi</h2>
+        <p class="desc">Akun langsung aktif dan bisa dipakai login di APK. Tidak perlu membuka Firebase Auth.</p>
+
+        <div class="grid2">
+          <div><label class="lbl" for="name">Nama <span style="font-weight:400;color:var(--mute)">(opsional)</span></label>
+            <div class="field"><i class="lead fa-regular fa-user"></i><input type="text" id="name" class="input" placeholder="Nama pengguna" autocomplete="off" maxlength="60"></div></div>
+          <div><label class="lbl" for="email">Email</label>
+            <div class="field"><i class="lead fa-regular fa-envelope"></i><input type="email" id="email" class="input" placeholder="pengguna@email.com" autocomplete="off"></div></div>
+        </div>
+
+        <label class="lbl" for="password">Password</label>
+        <div class="row">
+          <div class="field grow"><i class="lead fa-solid fa-key"></i><input type="password" id="password" class="input mono" placeholder="Minimal 6 karakter" autocomplete="new-password"></div>
+          <button type="button" class="btn ghost icon-btn" id="pwShow" title="Tampilkan / sembunyikan" aria-label="Tampilkan atau sembunyikan password"><i class="fa-solid fa-eye"></i></button>
+          <button type="button" class="btn ghost icon-btn" id="pwGen" title="Buat password acak" aria-label="Buat password acak"><i class="fa-solid fa-dice"></i></button>
+        </div>
+        <div class="meter"><i id="pwBar"></i></div>
+
+        <label class="lbl" for="duration">Masa aktif akun</label>
+        <select id="duration">
+          <option value="0">Tanpa batas</option><option value="1">1 hari</option><option value="7">7 hari</option>
+          <option value="30">30 hari</option><option value="90">90 hari</option><option value="365">1 tahun</option>
+        </select>
+
+        <button id="btnDaftar" class="btn block"><i class="fa-solid fa-user-plus"></i> Buat akun</button>
+        <p class="msg" id="statusText" role="status"></p>
+        <div class="cred mono" id="cred"></div>
+        <button class="btn ghost sm" id="credCopy" style="margin-top:10px" hidden><i class="fa-regular fa-copy"></i> Salin email &amp; password</button>
+
+        <details>
+          <summary>Buat banyak akun sekaligus</summary>
+          <div>
+            <p class="hint" style="margin:0 0 8px">Satu akun per baris dengan format <b>email,password</b>. Maksimal 50 baris.</p>
+            <textarea id="bulkIn" class="mono" placeholder="user1@email.com,sandi123&#10;user2@email.com,sandi456" spellcheck="false"></textarea>
+            <button class="btn" id="bulkBtn" style="margin-top:12px"><i class="fa-solid fa-users"></i> Buat semua akun</button>
+            <p class="msg" id="bulkMsg" role="status"></p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Kirim tautan reset password</summary>
+          <div>
+            <p class="hint" style="margin:0 0 8px">Untuk pengguna yang lupa password.</p>
+            <div class="row">
+              <input type="email" id="rEmail" class="input grow" placeholder="email@pengguna.com" aria-label="Email pengguna">
+              <button class="btn ghost" id="rBtn"><i class="fa-solid fa-paper-plane"></i> Kirim</button>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="panel">
+        <div class="row" style="justify-content:space-between">
+          <div><h2>Daftar akun</h2><p class="desc" id="userCount">Akun yang dibuat lewat panel ini.</p></div>
+        </div>
+        <div class="chips" id="userChips"></div>
+        <div class="toolbar">
+          <div class="field grow"><i class="lead fa-solid fa-magnifying-glass"></i><input type="search" id="userSearch" class="input" placeholder="Cari nama atau email" aria-label="Cari akun"></div>
+          <button class="btn ghost" id="usersCsv"><i class="fa-solid fa-download"></i> CSV</button>
+        </div>
+        <div class="users" id="userList"><p class="empty">Belum ada akun.</p></div>
+      </div>
+    </section>
+
+    <!-- ===== TAB KONTROL ===== -->
+    <section id="tab-kontrol" class="pane">
+      <div class="panel">
+        <div class="maint">
+          <div><h2>Mode maintenance</h2><p class="desc" id="maintStatusText">Status: normal</p></div>
+          <label class="switch"><input type="checkbox" id="maintToggle" aria-label="Mode maintenance"><span class="slider"></span></label>
+        </div>
+        <label class="lbl" for="maintMsg">Pesan untuk pengguna</label>
+        <div class="row">
+          <input type="text" id="maintMsg" class="input grow" maxlength="200" placeholder="Contoh: Sedang perbaikan server, kembali jam 20.00">
+          <button class="btn ghost" id="maintMsgSave">Simpan</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Pengumuman</h2>
+        <p class="desc">Aktif sekarang: <span id="annNow">tidak ada</span></p>
+        <div class="field" style="margin-top:14px"><i class="lead fa-solid fa-bullhorn"></i>
+          <input type="text" id="broadcastInput" class="input" maxlength="300" placeholder="Tulis pengumuman untuk semua pengguna"></div>
+        <select id="annType" style="margin-top:10px" aria-label="Jenis pengumuman">
+          <option value="info">Info (biru)</option><option value="warning">Peringatan (kuning)</option><option value="danger">Penting (merah)</option>
+        </select>
+        <div class="row" style="margin-top:12px">
+          <button id="btnBroadcast" class="btn"><i class="fa-solid fa-paper-plane"></i> Kirim pengumuman</button>
+          <button id="btnClearAnn" class="btn ghost"><i class="fa-solid fa-xmark"></i> Hapus</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Fitur aplikasi (feature flag)</h2>
+        <p class="desc">Nyalakan atau matikan fitur di APK kapan saja tanpa update. APK membaca nilai true/false dari nama fitur.</p>
+        <div class="row" style="margin-top:14px">
+          <input type="text" id="flagKey" class="input grow mono" maxlength="30" placeholder="nama_fitur (huruf, angka, _)" autocomplete="off">
+          <button class="btn" id="flagAdd"><i class="fa-solid fa-plus"></i> Tambah</button>
+        </div>
+        <div id="flagList" style="margin-top:8px"><p class="empty">Belum ada fitur.</p></div>
+      </div>
+
+      <div class="panel danger">
+        <h2>Paksa semua pengguna login ulang</h2>
+        <p class="desc">Semua pengguna akan keluar dari APK dan harus login lagi. Berguna setelah ganti kebijakan atau ada akun bocor.</p>
+        <button class="btn warn" id="forceLogoutBtn" style="margin-top:14px"><i class="fa-solid fa-power-off"></i> Paksa logout semua</button>
+      </div>
+
+      <div class="panel">
+        <h2>Update aplikasi</h2>
+        <p class="desc">Pengguna akan diminta memperbarui APK ke versi ini.</p>
+        <div class="grid2">
+          <div><label class="lbl" for="versionInput">Versi</label><input type="text" id="versionInput" class="input" placeholder="1.1.0"></div>
+          <div><label class="lbl" for="urlInput">Link download</label><input type="text" id="urlInput" class="input" placeholder="https://..."></div>
+        </div>
+        <label class="lbl" for="changelogInput">Catatan perubahan</label>
+        <textarea id="changelogInput" maxlength="500" placeholder="Apa yang baru di versi ini (opsional)"></textarea>
+        <label class="check" style="margin-top:14px"><input type="checkbox" id="forceInput"> Wajib update, pengguna tidak bisa melewati</label>
+        <button id="btnUpdateVersion" class="btn block"><i class="fa-solid fa-cloud-arrow-up"></i> Simpan versi</button>
+      </div>
+    </section>
+
+    <!-- ===== TAB RIWAYAT ===== -->
+    <section id="tab-riwayat" class="pane">
+      <div class="panel">
+        <div class="row" style="justify-content:space-between;flex-wrap:wrap">
+          <div><h2>Riwayat aktivitas</h2><p class="desc">100 aktivitas terakhir, tersimpan di cloud.</p></div>
+          <div class="row">
+            <select id="fil" aria-label="Filter riwayat" style="width:auto"><option value="">Semua</option><option value="akun">Akun</option><option value="sistem">Pengaturan</option></select>
+            <button class="btn ghost" id="csv"><i class="fa-solid fa-download"></i> CSV</button>
+          </div>
+        </div>
+        <div class="hist" id="histList" style="margin-top:12px"><p class="empty">Belum ada aktivitas.</p></div>
+      </div>
+    </section>
+
+    <!-- ===== TAB INTEGRASI ===== -->
+    <section id="tab-integrasi" class="pane">
+      <div class="panel">
+        <h2>Cara APK membaca panel ini</h2>
+        <p class="desc">Semua fitur di panel disimpan di Firestore. APK cukup membaca data berikut.</p>
+        <pre class="code mono" id="schemaCode">system/config
+  maintenance: boolean
+  maintenanceMessage: string
+  announcement: string
+  announcementType: "info" | "warning" | "danger"
+  version: string
+  updateUrl: string
+  changelog: string
+  forceUpdate: boolean
+  forceLogoutAt: waktu ISO (string)
+  flags: { namaFitur: boolean }
+
+users/{uid}
+  email, name, createdAt, createdBy
+  banned: boolean
+  expiresAt: waktu ISO (string) atau null
+  lastSeen: waktu ISO (string), ditulis oleh APK</pre>
+        <button class="btn ghost sm" id="schemaCopy" style="margin-top:10px"><i class="fa-regular fa-copy"></i> Salin struktur data</button>
+      </div>
+      <div class="panel">
+        <h2>Yang perlu dilakukan di APK</h2>
+        <ol class="steps">
+          <li>Setelah login, baca <b>users/{uid}</b>. Kalau <b>banned</b> true atau <b>expiresAt</b> sudah lewat, langsung logout dan tampilkan alasannya.</li>
+          <li>Pantau <b>system/config</b> secara realtime. Kalau <b>maintenance</b> true, tampilkan layar blokir dengan <b>maintenanceMessage</b>.</li>
+          <li>Tampilkan <b>announcement</b> sebagai banner sesuai <b>announcementType</b>.</li>
+          <li>Kalau <b>version</b> lebih baru dari versi terpasang, munculkan dialog update ke <b>updateUrl</b>. Jika <b>forceUpdate</b> true, dialog tidak bisa ditutup.</li>
+          <li>Kalau <b>forceLogoutAt</b> lebih baru dari waktu login lokal, panggil signOut.</li>
+          <li>Pakai <b>flags.namaFitur</b> untuk menyalakan atau mematikan fitur tertentu tanpa update APK.</li>
+          <li>Saat APK terbuka, tulis <b>lastSeen</b> ke users/{uid} tiap sekitar 2 menit supaya status Online muncul di panel.</li>
+        </ol>
+      </div>
+    </section>
+  </div>
+</div>
+<div id="toast" role="status"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, query, orderBy, limit, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// true = panel meminta login admin dulu. Isi ADMIN_EMAILS dengan email admin
+// (harus sudah terdaftar di Firebase Auth). Kosongkan array untuk mengizinkan semua akun.
+const REQUIRE_ADMIN_LOGIN = true;
+const ADMIN_EMAILS = ["dulz@adminpanel.com"];
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBaqQwIUPMZboDcBARHQ5MohSH6R1H_6cs",
+    authDomain: "dulzinstaller.firebaseapp.com",
+    projectId: "dulzinstaller",
+    storageBucket: "dulzinstaller.firebasestorage.app",
+    messagingSenderId: "668190769709",
+    appId: "1:668190769709:web:4cfa9177c19508e49ceea4",
+    measurementId: "G-73B4DB2C10"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+// Instance kedua khusus membuat akun, supaya sesi admin di browser ini tidak berganti.
+const auth2 = getAuth(initializeApp(firebaseConfig, "creator"));
+const configDocRef = doc(db, "system", "config");
+
+const $ = id => document.getElementById(id);
+let adminEmail = "panel", unsubs = [], logs = [], users = [], flags = {}, filled = false, lastCred = "";
+
+/* ---------- Util ---------- */
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),2800)}
+function setMsg(el,cls,text){el.className="msg "+cls;el.textContent=text}
+const fmt = iso => {const d=new Date(iso);return isNaN(d)?"-":d.toLocaleString("id-ID",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})};
+const store = {
+    get(k){try{return localStorage.getItem(k)}catch(e){return null}},
+    set(k,v){try{localStorage.setItem(k,v)}catch(e){}},
+    del(k){try{localStorage.removeItem(k)}catch(e){}}
+};
+async function record(type,action,detail){
+    try{await addDoc(collection(db,"logs"),{type,action,detail:detail||"",admin:adminEmail,time:new Date().toISOString()})}catch(e){}
+}
+function toggleEye(input,btn){
+    const hide=input.type==="password"; input.type=hide?"text":"password";
+    btn.firstElementChild.className=hide?"fa-solid fa-eye-slash":"fa-solid fa-eye";
+}
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t===b));
+    document.querySelectorAll(".pane").forEach(c=>c.classList.toggle("active",c.id==="tab-"+b.dataset.tab));
+}));
+
+/* ---------- Realtime listeners ---------- */
+function start(){
+    unsubs.forEach(u=>u()); unsubs=[]; filled=false;
+    unsubs.push(onSnapshot(configDocRef, snap=>{
+        const d=snap.exists()?snap.data():{}, m=d.maintenance===true;
+        $("maintToggle").checked=m;
+        $("maintStatusText").textContent=m?"Status: maintenance, pengguna diblokir":"Status: normal, aplikasi aktif";
+        $("sMaint").textContent=m?"Maintenance":"Normal"; $("sMaint").style.color=m?"var(--danger)":"var(--ok)";
+        $("sVer").textContent=d.version?"v"+d.version:"Belum diatur";
+        $("sAnn").textContent=d.announcement?"Aktif":"Tidak ada";
+        $("annNow").textContent=d.announcement?`"${d.announcement}"`:"tidak ada";
+        flags=d.flags||{}; renderFlags();
+        if(!filled){filled=true;$("versionInput").value=d.version||"";$("urlInput").value=d.updateUrl||"";$("changelogInput").value=d.changelog||"";$("forceInput").checked=d.forceUpdate===true;$("maintMsg").value=d.maintenanceMessage||"";$("annType").value=d.announcementType||"info"}
+    }, ()=>toast("Gagal membaca pengaturan. Periksa aturan Firestore.")));
+    unsubs.push(onSnapshot(query(collection(db,"logs"),orderBy("time","desc"),limit(100)), s=>{logs=s.docs.map(d=>d.data());renderHist()}, ()=>{}));
+    unsubs.push(onSnapshot(query(collection(db,"users"),orderBy("createdAt","desc"),limit(300)), s=>{users=s.docs.map(d=>d.data());renderUsers()}, ()=>{
+        $("userList").innerHTML='<p class="empty">Daftar akun tidak bisa dibaca. Periksa aturan Firestore untuk koleksi "users".</p>';
+    }));
+}
+
+/* ---------- Riwayat ---------- */
+function renderHist(){
+    const f=$("fil").value, box=$("histList"), rows=logs.filter(l=>!f||l.type===f);
+    box.replaceChildren();
+    if(!rows.length){box.innerHTML='<p class="empty">Belum ada aktivitas.</p>';return}
+    rows.forEach(l=>{
+        const r=document.createElement("div"); r.className="hrow";
+        const t=document.createElement("time"); t.textContent=fmt(l.time);
+        const c=document.createElement("div");
+        c.textContent=(l.action==="web_register"?"Akun dibuat":l.action||"-")+(l.detail?": "+l.detail:l.email?": "+l.email:"");
+        const s=document.createElement("small"); s.textContent=l.admin?" oleh "+l.admin:""; c.append(s);
+        r.append(t,c); box.append(r);
+    });
+}
+$("fil").addEventListener("change",renderHist);
+$("csv").addEventListener("click",()=>{
+    if(!logs.length) return toast("Belum ada data untuk diekspor.");
+    const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+    const csv=["waktu,jenis,aksi,detail,admin",...logs.map(l=>[l.time,l.type,l.action,l.detail||l.email,l.admin].map(q).join(","))].join("\n");
+    const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+    a.download="riwayat-dulz.csv"; a.click(); URL.revokeObjectURL(a.href);
+});
+
+/* ---------- Kontrol: maintenance, broadcast, update ---------- */
+$("maintToggle").addEventListener("change", async ()=>{
+    const state=$("maintToggle").checked;
+    try{
+        await setDoc(configDocRef,{maintenance:state},{merge:true});
+        record("sistem","Mode maintenance",state?"Diaktifkan":"Dimatikan");
+        toast(state?"Mode maintenance aktif":"Aplikasi kembali normal");
+    }catch(err){ $("maintToggle").checked=!state; toast("Gagal mengubah mode maintenance.") }
+});
+$("btnBroadcast").addEventListener("click", async ()=>{
+    const msg=$("broadcastInput").value.trim();
+    if(!msg) return toast("Pesan pengumuman masih kosong.");
+    try{
+        await setDoc(configDocRef,{announcement:msg,announcementType:$("annType").value},{merge:true});
+        record("sistem","Pengumuman dikirim",msg);
+        toast("Pengumuman terkirim ke semua pengguna");
+        $("broadcastInput").value="";
+    }catch(err){ toast("Gagal mengirim pengumuman.") }
+});
+$("btnClearAnn").addEventListener("click", async ()=>{
+    try{ await setDoc(configDocRef,{announcement:""},{merge:true}); record("sistem","Pengumuman dihapus"); toast("Pengumuman dihapus") }
+    catch(err){ toast("Gagal menghapus pengumuman.") }
+});
+$("btnUpdateVersion").addEventListener("click", async ()=>{
+    const version=$("versionInput").value.trim().replace(/^v/i,""), url=$("urlInput").value.trim();
+    if(!version||!url) return toast("Versi dan link download wajib diisi.");
+    if(!/^\d+(\.\d+){0,3}$/.test(version)) return toast("Versi harus berupa angka, contoh 1.1.0");
+    if(!/^https:\/\//i.test(url)) return toast("Link download harus diawali https://");
+    try{
+        await setDoc(configDocRef,{version,updateUrl:url,changelog:$("changelogInput").value.trim(),forceUpdate:$("forceInput").checked},{merge:true});
+        record("sistem","Versi diperbarui","v"+version+($("forceInput").checked?" (wajib)":""));
+        toast("Versi tersimpan");
+    }catch(err){ toast("Gagal menyimpan versi.") }
+});
+
+/* ---------- Akun ---------- */
+const errMap={
+    "auth/email-already-in-use":"email sudah terdaftar",
+    "auth/invalid-email":"format email tidak valid",
+    "auth/weak-password":"password terlalu lemah (minimal 6 karakter)",
+    "auth/network-request-failed":"koneksi internet bermasalah",
+    "auth/operation-not-allowed":"metode Email/Password belum diaktifkan di Firebase"
+};
+async function createAccount(email,password,name=""){
+    const c=await createUserWithEmailAndPassword(auth2,email,password);
+    await signOut(auth2);
+    try{ const days=parseInt($("duration").value)||0; await setDoc(doc(db,"users",c.user.uid),{uid:c.user.uid,email,name,banned:false,expiresAt:days?new Date(Date.now()+days*864e5).toISOString():null,createdAt:new Date().toISOString(),createdBy:adminEmail}) }catch(e){}
+    try{ await addDoc(collection(db,"logs"),{uid:c.user.uid,type:"akun",action:"Akun dibuat",detail:email,time:new Date().toISOString(),admin:adminEmail}) }catch(e){}
+    return c;
+}
+$("btnDaftar").addEventListener("click", async ()=>{
+    const email=$("email").value.trim(), password=$("password").value, name=$("name").value.trim(), st=$("statusText");
+    $("cred").classList.remove("on"); $("credCopy").hidden=true;
+    if(!email||!password) return setMsg(st,"err","Email dan password wajib diisi.");
+    if(password.length<6) return setMsg(st,"err","Password minimal 6 karakter.");
+    setMsg(st,"load","Membuat akun...");
+    $("btnDaftar").disabled=true;
+    try{
+        await createAccount(email,password,name);
+        lastCred=`Email: ${email}\nPassword: ${password}`;
+        $("cred").textContent=lastCred; $("cred").classList.add("on"); $("credCopy").hidden=false;
+        setMsg(st,"ok","Akun berhasil dibuat. Simpan password ini, tidak akan ditampilkan lagi.");
+        $("email").value=""; $("name").value=""; $("password").value=""; $("password").type="password"; $("pwShow").firstElementChild.className="fa-solid fa-eye"; meter();
+    }catch(error){
+        setMsg(st,"err","Gagal: "+(errMap[error.code]||error.message));
+    }
+    $("btnDaftar").disabled=false;
+});
+$("credCopy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(lastCred);toast("Tersalin")}catch(e){toast("Gagal menyalin, salin manual.")}});
+
+$("pwShow").addEventListener("click",()=>toggleEye($("password"),$("pwShow")));
+$("pwGen").addEventListener("click",()=>{
+    const set="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
+    $("password").value=Array.from(crypto.getRandomValues(new Uint32Array(14)),n=>set[n%set.length]).join("");
+    $("password").type="text"; $("pwShow").firstElementChild.className="fa-solid fa-eye-slash"; meter();
+});
+function meter(){
+    const p=$("password").value; let s=0;
+    if(p.length>=6)s++; if(p.length>=10)s++; if(/[A-Z]/.test(p)&&/[a-z]/.test(p))s++; if(/\d/.test(p)&&/[^A-Za-z0-9]/.test(p))s++;
+    const b=$("pwBar"); b.style.width=p?(s*25)+"%":"0"; b.style.background=["var(--danger)","var(--danger)","var(--warn)","var(--accent)","var(--ok)"][s];
+}
+$("password").addEventListener("input",meter);
+
+// Buat banyak akun
+$("bulkBtn").addEventListener("click", async ()=>{
+    const lines=$("bulkIn").value.split("\n").map(l=>l.trim()).filter(Boolean), msg=$("bulkMsg");
+    if(!lines.length) return setMsg(msg,"err","Isi daftar akun dulu.");
+    if(lines.length>50) return setMsg(msg,"err","Maksimal 50 akun sekali proses.");
+    $("bulkBtn").disabled=true; let ok=0; const fail=[];
+    for(let i=0;i<lines.length;i++){
+        const [email,...rest]=lines[i].split(","), pass=rest.join(",").trim();
+        setMsg(msg,"load",`Memproses ${i+1} dari ${lines.length}...`);
+        try{ if(!email||pass.length<6) throw {code:"auth/weak-password"}; await createAccount(email.trim(),pass); ok++ }
+        catch(e){ fail.push((email||"?").trim()+" ("+(errMap[e.code]||"gagal")+")") }
+    }
+    setMsg(msg,fail.length?"err":"ok",`Selesai: ${ok} berhasil, ${fail.length} gagal.`+(fail.length?" Gagal: "+fail.join("; "):""));
+    if(ok) record("akun","Buat akun massal",ok+" akun");
+    if(!fail.length) $("bulkIn").value="";
+    $("bulkBtn").disabled=false;
+});
+
+// Reset password
+async function sendReset(email){
+    try{ await sendPasswordResetEmail(auth2,email); record("akun","Tautan reset dikirim",email); toast("Tautan reset terkirim ke "+email); return true }
+    catch(err){ toast(err.code==="auth/user-not-found"?"Email tidak terdaftar.":"Gagal mengirim tautan reset."); return false }
+}
+$("rBtn").addEventListener("click", async ()=>{
+    const email=$("rEmail").value.trim(); if(!email) return toast("Isi email pengguna dulu.");
+    if(await sendReset(email)) $("rEmail").value="";
+});
+
+// Daftar akun
+const dShort = iso => new Date(iso).toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"});
+function userStatus(u){
+    if(u.banned) return ["Diblokir","ban"];
+    if(u.expiresAt && new Date(u.expiresAt)<new Date()) return ["Kedaluwarsa","exp"];
+    if(u.lastSeen && Date.now()-new Date(u.lastSeen)<3e5) return ["Online","on"];
+    return ["Aktif",""];
+}
+async function patchUser(u,data,logAction){
+    try{ await setDoc(doc(db,"users",u.uid),data,{merge:true}); record("akun",logAction,u.email); toast("Tersimpan") }
+    catch(e){ toast("Gagal menyimpan. Periksa aturan Firestore.") }
+}
+function renderUsers(){
+    const q=$("userSearch").value.trim().toLowerCase(), box=$("userList");
+    const rows=users.filter(u=>!q||(u.email||"").toLowerCase().includes(q)||(u.name||"").toLowerCase().includes(q));
+    const c={ban:0,exp:0,on:0}; users.forEach(u=>{const k=userStatus(u)[1]; if(k) c[k]++});
+    $("userCount").textContent="Akun yang dibuat lewat panel ini.";
+    $("userChips").innerHTML=`<span class="chip"><b>${users.length}</b>Total</span><span class="chip"><b>${c.on}</b>Online</span><span class="chip"><b>${c.exp}</b>Kedaluwarsa</span><span class="chip"><b>${c.ban}</b>Diblokir</span>`;
+    box.replaceChildren();
+    if(!rows.length){box.innerHTML=`<p class="empty">${users.length?"Tidak ada akun yang cocok.":"Belum ada akun. Buat akun pertama di atas."}</p>`;return}
+    rows.forEach(u=>{
+        const [label,cls]=userStatus(u);
+        const r=document.createElement("div"); r.className="urow";
+        const av=document.createElement("div"); av.className="avatar"; av.textContent=((u.name||u.email||"?")[0]||"?").toUpperCase();
+        const info=document.createElement("div"); info.className="uinfo";
+        const b=document.createElement("b"); b.textContent=u.name||u.email;
+        const bd=document.createElement("span"); bd.className="badge "+cls; bd.textContent=label; b.append(bd);
+        const sm=document.createElement("small");
+        sm.textContent=(u.name?u.email+" · ":"")+(u.expiresAt?"Berlaku sampai "+dShort(u.expiresAt):"Tanpa batas");
+        info.append(b,sm);
+        const act=document.createElement("div"); act.className="uact";
+        const mk=(html,fn)=>{const x=document.createElement("button");x.className="btn ghost sm";x.innerHTML=html;x.addEventListener("click",fn);act.append(x)};
+        mk(u.banned?'<i class="fa-solid fa-lock-open"></i> Buka':'<i class="fa-solid fa-ban"></i> Blokir',()=>{
+            if(confirm((u.banned?"Buka blokir ":"Blokir ")+u.email+"?")) patchUser(u,{banned:!u.banned},u.banned?"Blokir dibuka":"Akun diblokir");
+        });
+        mk('<i class="fa-regular fa-calendar-plus"></i> Masa aktif',()=>{
+            const v=prompt("Tambah masa aktif berapa hari untuk "+u.email+"?\n(isi 0 untuk tanpa batas)","30");
+            if(v===null) return; const d=parseInt(v); if(isNaN(d)||d<0) return toast("Isi angka hari yang valid.");
+            if(d===0) return patchUser(u,{expiresAt:null},"Masa aktif tanpa batas");
+            const base=Math.max(Date.now(),u.expiresAt?new Date(u.expiresAt).getTime():0);
+            patchUser(u,{expiresAt:new Date(base+d*864e5).toISOString()},"Masa aktif +"+d+" hari");
+        });
+        mk('<i class="fa-solid fa-key"></i> Reset',()=>{ if(confirm("Kirim tautan reset password ke "+u.email+"?")) sendReset(u.email) });
+        mk('<i class="fa-regular fa-copy"></i> Email',async()=>{try{await navigator.clipboard.writeText(u.email);toast("Email tersalin")}catch(e){toast("Gagal menyalin")}});
+        r.append(av,info,act); box.append(r);
+    });
+}
+$("userSearch").addEventListener("input",renderUsers);
+
+$("usersCsv").addEventListener("click",()=>{
+    if(!users.length) return toast("Belum ada akun untuk diekspor.");
+    const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+    const csv=["email,nama,dibuat,berlaku_sampai,status",...users.map(u=>[u.email,u.name,u.createdAt,u.expiresAt||"tanpa batas",userStatus(u)[0]].map(q).join(","))].join("\n");
+    const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+    a.download="akun-dulz.csv"; a.click(); URL.revokeObjectURL(a.href);
+});
+
+/* ---------- Pesan maintenance ---------- */
+$("maintMsgSave").addEventListener("click", async ()=>{
+    try{ await setDoc(configDocRef,{maintenanceMessage:$("maintMsg").value.trim()},{merge:true}); record("sistem","Pesan maintenance diubah"); toast("Pesan tersimpan") }
+    catch(e){ toast("Gagal menyimpan pesan.") }
+});
+
+/* ---------- Feature flags ---------- */
+function renderFlags(){
+    const box=$("flagList"), keys=Object.keys(flags).sort(); box.replaceChildren();
+    if(!keys.length){box.innerHTML='<p class="empty">Belum ada fitur. Tambahkan nama fitur di atas.</p>';return}
+    keys.forEach(k=>{
+        const r=document.createElement("div"); r.className="frow";
+        const code=document.createElement("code"); code.textContent=k;
+        const sw=document.createElement("label"); sw.className="switch ok";
+        const inp=document.createElement("input"); inp.type="checkbox"; inp.checked=flags[k]===true; inp.setAttribute("aria-label","Fitur "+k);
+        const sl=document.createElement("span"); sl.className="slider"; sw.append(inp,sl);
+        inp.addEventListener("change", async ()=>{
+            try{ await setDoc(configDocRef,{flags:{[k]:inp.checked}},{merge:true}); record("sistem","Fitur "+k,inp.checked?"Dinyalakan":"Dimatikan") }
+            catch(e){ inp.checked=!inp.checked; toast("Gagal mengubah fitur.") }
+        });
+        const del=document.createElement("button"); del.className="btn ghost sm"; del.innerHTML='<i class="fa-solid fa-trash"></i>'; del.setAttribute("aria-label","Hapus fitur "+k);
+        del.addEventListener("click", async ()=>{
+            if(!confirm("Hapus fitur "+k+"?")) return;
+            try{ await updateDoc(configDocRef,{["flags."+k]:deleteField()}); record("sistem","Fitur dihapus",k) }
+            catch(e){ toast("Gagal menghapus fitur.") }
+        });
+        r.append(code,sw,del); box.append(r);
+    });
+}
+$("flagAdd").addEventListener("click", async ()=>{
+    const k=$("flagKey").value.trim();
+    if(!/^[A-Za-z][A-Za-z0-9_]{1,29}$/.test(k)) return toast("Nama fitur: diawali huruf, hanya huruf/angka/_, 2-30 karakter.");
+    if(k in flags) return toast("Fitur itu sudah ada.");
+    try{ await setDoc(configDocRef,{flags:{[k]:false}},{merge:true}); record("sistem","Fitur ditambahkan",k); $("flagKey").value="" }
+    catch(e){ toast("Gagal menambah fitur.") }
+});
+
+/* ---------- Paksa logout ---------- */
+$("forceLogoutBtn").addEventListener("click", async ()=>{
+    if(!confirm("Semua pengguna APK akan dipaksa login ulang. Lanjutkan?")) return;
+    try{ await setDoc(configDocRef,{forceLogoutAt:new Date().toISOString()},{merge:true}); record("sistem","Paksa logout semua pengguna"); toast("Perintah logout terkirim") }
+    catch(e){ toast("Gagal mengirim perintah.") }
+});
+
+/* ---------- Integrasi ---------- */
+$("schemaCopy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("schemaCode").textContent);toast("Struktur data tersalin")}catch(e){toast("Gagal menyalin")}});
+
+/* ---------- Login admin + Ingat saya ---------- */
+function showLogin(){ $("app").hidden=true; $("login").hidden=false }
+function showApp(){ $("login").hidden=true; $("app").hidden=false }
+const loginErr={
+    "auth/invalid-credential":"Email atau password salah.",
+    "auth/wrong-password":"Email atau password salah.",
+    "auth/user-not-found":"Email atau password salah.",
+    "auth/invalid-email":"Format email tidak valid.",
+    "auth/too-many-requests":"Terlalu banyak percobaan. Coba lagi beberapa menit lagi.",
+    "auth/network-request-failed":"Koneksi internet bermasalah.",
+    "auth/user-disabled":"Akun ini dinonaktifkan."
+};
+
+if(!REQUIRE_ADMIN_LOGIN){ showApp(); $("whoEmail").textContent="Mode tanpa login"; start(); }
+else{
+    // Isi ulang email yang diingat
+    const saved=store.get("dulz_admin_email");
+    if(saved){ $("lEmail").value=saved; $("lRemember").checked=true; }
+    else if(store.get("dulz_remember")==="0"){ $("lRemember").checked=false }
+
+    onAuthStateChanged(auth,user=>{
+        unsubs.forEach(u=>u()); unsubs=[];
+        if(!user){ showLogin(); return }
+        if(ADMIN_EMAILS.length && !ADMIN_EMAILS.includes(user.email)){
+            signOut(auth).then(()=>{ showLogin(); setMsg($("lMsg"),"err","Akun ini tidak punya akses admin.") }); return;
+        }
+        adminEmail=user.email; $("whoEmail").textContent=user.email; $("logoutBtn").hidden=false;
+        showApp(); start();
+    });
+
+    $("lShow").addEventListener("click",()=>toggleEye($("lPass"),$("lShow")));
+    $("loginForm").addEventListener("submit", async e=>{
+        e.preventDefault();
+        const email=$("lEmail").value.trim(), pass=$("lPass").value, remember=$("lRemember").checked, btn=$("lBtn");
+        if(!email||!pass) return setMsg($("lMsg"),"err","Isi email dan password.");
+        btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> <span>Memeriksa...</span>'; $("lMsg").textContent="";
+        try{
+            // Ingat saya: sesi tetap tersimpan walau browser ditutup. Jika tidak dicentang, sesi hilang saat tab ditutup.
+            await setPersistence(auth, remember?browserLocalPersistence:browserSessionPersistence);
+            await signInWithEmailAndPassword(auth,email,pass);
+            if(remember){ store.set("dulz_admin_email",email); store.del("dulz_remember") }
+            else{ store.del("dulz_admin_email"); store.set("dulz_remember","0") }
+            $("lPass").value="";
+        }catch(err){ setMsg($("lMsg"),"err",loginErr[err.code]||"Gagal masuk. Coba lagi.") }
+        btn.disabled=false; btn.innerHTML="<span>Masuk</span>";
+    });
+    $("lForgot").addEventListener("click", async ()=>{
+        const email=$("lEmail").value.trim();
+        if(!email) return setMsg($("lMsg"),"err","Isi email admin dulu, lalu klik Lupa password.");
+        try{ await sendPasswordResetEmail(auth,email); setMsg($("lMsg"),"ok","Tautan reset dikirim ke "+email+".") }
+        catch(err){ setMsg($("lMsg"),"err","Gagal mengirim tautan reset.") }
+    });
+    $("logoutBtn").addEventListener("click",()=>signOut(auth));
+}
+</script>
+</body>
+</html>
